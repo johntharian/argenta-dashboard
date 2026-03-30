@@ -1,12 +1,12 @@
 import Link from 'next/link';
 
 const STEPS = [
-  { n: '01', text: 'You create a wallet with a budget and spending rules' },
-  { n: '02', text: 'AgentPay issues a Stripe virtual card behind the scenes' },
-  { n: '03', text: 'Your agent gets a one-time claim token — paste it into a system prompt' },
-  { n: '04', text: 'Agent exchanges the token for a wallet key, uses it to request spend authorization' },
-  { n: '05', text: 'Every spend runs through a policy engine before touching the payment network' },
-  { n: '06', text: 'Stripe enforces the same rules again as an independent second gate' },
+  { n: '01', text: 'Register an account and create a wallet with a hard budget and spending policies' },
+  { n: '02', text: 'Generate a one-time claim token and pass it to your agent via system prompt' },
+  { n: '03', text: 'The agent securely claims the wallet via MCP to receive a persistent wallet key' },
+  { n: '04', text: 'For each purchase, the agent requests spend authorization for a specific merchant and amount' },
+  { n: '05', text: 'AgentPay evaluates the request against your custom rules. If approved, it provisions a single-use virtual card scoped exactly to that purchase' },
+  { n: '06', text: 'The card auto-expires in 5 minutes. Working out-of-the-box with any merchant while guaranteeing zero exposure' },
 ];
 
 const FEATURES = [
@@ -20,19 +20,34 @@ const FEATURES = [
 
 const USE_CASES = [
   {
+    icon: '◈',
     title: 'Autonomous Procurement',
-    description: 'Agents buy computing power, API credits, or datasets directly. Set a hard cap, let them execute, and never expose your real card.',
-    icon: '⌗'
+    description: 'Provide an AI agent with a $500 monthly budget specifically for purchasing AWS, Vercel, or cloud API credits without needing your credit card.'
   },
   {
+    icon: '◉',
     title: 'Customer Support Refunds',
-    description: 'Empower support agents to issue small appeasements or account credits directly to customers, governed by a strict daily allowance.',
-    icon: '⟟'
+    description: 'Empower support bots to issue refunds or tiny appeasements directly to users while governed by a strict $20 daily cap.'
   },
   {
+    icon: '◎',
     title: 'Marketing & Ad Spend',
-    description: 'Allow growth agents to independently scale ad campaigns or buy sponsorships based on real-time performance metrics.',
-    icon: '◂'
+    description: 'Let growth agents autonomously test and scale campaigns, halting spend immediately when alert thresholds are hit.'
+  },
+  {
+    icon: '◆',
+    title: 'Personal AI Concierge',
+    description: 'Allow your personal assistant to book flights, reserve hotels, or order food deliveries with a strict allowance and merchant category locks.'
+  },
+  {
+    icon: '◇',
+    title: 'Data & Research Acquisition',
+    description: 'Enable research agents to seamlessly bypass API paywalls, purchase gated datasets, or buy premium industry reports autonomously.'
+  },
+  {
+    icon: '◐',
+    title: 'Automated E-commerce',
+    description: 'Give purchasing bots the ability to execute inventory buy-orders across different suppliers using a unique 5-minute virtual card per checkout.'
   }
 ];
 
@@ -190,27 +205,48 @@ export default function Home() {
 
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
           gap: '24px',
         }}>
           {USE_CASES.map((u, i) => (
-            <div key={u.title} className={`page-enter page-enter-delay-${i + 1}`} style={{
+            <div key={u.title} className={`page-enter page-enter-delay-${i + 1} wallet-card`} style={{
               background: 'var(--bg-1)',
               border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-lg)',
-              padding: '32px 24px',
-              display: 'flex', flexDirection: 'column', gap: '16px'
+              borderRadius: '16px',
+              overflow: 'hidden',
+              display: 'flex', flexDirection: 'column',
+              boxShadow: '0 12px 40px rgba(0, 0, 0, 0.4)',
             }}>
+              {/* Graphic Header */}
               <div style={{
-                width: 32, height: 32,
-                background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'var(--green)', fontSize: '14px'
+                height: '110px',
+                background: 'linear-gradient(180deg, rgba(61,255,130,0.1) 0%, transparent 100%)',
+                position: 'relative',
+                display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+                paddingBottom: '16px',
               }}>
-                {u.icon}
+                <div style={{
+                  position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                  backgroundImage: 'radial-gradient(circle at center, rgba(61,255,130,0.15) 1px, transparent 1px)',
+                  backgroundSize: '12px 12px', opacity: 0.5,
+                }} />
+                
+                <div style={{
+                  width: 48, height: 48, borderRadius: '50%',
+                  background: 'var(--bg-2)',
+                  boxShadow: '0 4px 12px rgba(61,255,130,0.05)',
+                  border: '1px solid rgba(61,255,130,0.2)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: 'var(--green)', fontSize: '18px',
+                  position: 'relative', zIndex: 1
+                }}>
+                  {u.icon}
+                </div>
               </div>
-              <div>
-                <h3 style={{ color: 'var(--text)', fontSize: '14px', fontWeight: 600, marginBottom: '8px', letterSpacing: '0.02em' }}>
+              
+              {/* Content */}
+              <div style={{ padding: '0 24px 32px', textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <h3 style={{ color: 'var(--text)', fontWeight: 600, fontSize: '15px', marginBottom: '8px', letterSpacing: '-0.01em' }}>
                   {u.title}
                 </h3>
                 <p style={{ color: 'var(--text-2)', fontSize: '13px', lineHeight: 1.6, margin: 0 }}>
@@ -233,25 +269,54 @@ export default function Home() {
 
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-          gap: '1px',
-          background: 'var(--border)',
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-lg)',
-          overflow: 'hidden',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+          gap: '24px',
         }}>
           {FEATURES.map((f, i) => (
-            <div key={f.label} className={`page-enter page-enter-delay-${i + 1}`} style={{
+            <div key={f.label} className={`page-enter page-enter-delay-${i + 1} wallet-card`} style={{
               background: 'var(--bg-1)',
-              padding: '24px',
+              border: '1px solid var(--border)',
+              borderRadius: '16px',
+              overflow: 'hidden',
+              display: 'flex', flexDirection: 'column',
+              boxShadow: '0 12px 40px rgba(0, 0, 0, 0.4)',
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                <span style={{ color: 'var(--green)', fontSize: '11px', opacity: 0.8 }}>{f.icon}</span>
-                <span style={{ color: 'var(--text)', fontWeight: 500, fontSize: '12px', letterSpacing: '0.04em' }}>
-                  {f.label}
-                </span>
+              {/* Graphic Header */}
+              <div style={{
+                height: '110px',
+                background: 'linear-gradient(180deg, rgba(61,255,130,0.1) 0%, transparent 100%)',
+                position: 'relative',
+                display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+                paddingBottom: '16px',
+              }}>
+                <div style={{
+                  position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                  backgroundImage: 'radial-gradient(circle at center, rgba(61,255,130,0.15) 1px, transparent 1px)',
+                  backgroundSize: '12px 12px', opacity: 0.5,
+                }} />
+                
+                <div style={{
+                  width: 48, height: 48, borderRadius: '50%',
+                  background: 'var(--bg-2)',
+                  boxShadow: '0 4px 12px rgba(61,255,130,0.05)',
+                  border: '1px solid rgba(61,255,130,0.2)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: 'var(--green)', fontSize: '18px',
+                  position: 'relative', zIndex: 1
+                }}>
+                  {f.icon}
+                </div>
               </div>
-              <p style={{ color: 'var(--text-3)', fontSize: '12px', lineHeight: 1.6, margin: 0 }}>{f.desc}</p>
+              
+              {/* Content */}
+              <div style={{ padding: '0 24px 32px', textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <h3 style={{ color: 'var(--text)', fontWeight: 600, fontSize: '15px', marginBottom: '8px', letterSpacing: '-0.01em' }}>
+                  {f.label}
+                </h3>
+                <p style={{ color: 'var(--text-2)', fontSize: '13px', lineHeight: 1.6, margin: 0 }}>
+                  {f.desc}
+                </p>
+              </div>
             </div>
           ))}
         </div>
