@@ -9,6 +9,7 @@ import {
 } from '@/lib/api';
 import ClaimTokenBox from '@/components/ClaimTokenBox';
 import TopUpModal from '@/components/TopUpModal';
+import EditPolicyModal from '@/components/EditPolicyModal';
 
 function StatusBadge({ status }: { status: Wallet['status'] }) {
   return <span className={`badge badge-${status}`}>{status}</span>;
@@ -93,6 +94,15 @@ function AlertRow({ alert, onResolve, walletId }: { alert: Alert; onResolve: () 
 export default function WalletDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+
+  // Safety guard: /wallets/settings is a static route that should never reach
+  // this dynamic page, but redirect just in case.
+  useEffect(() => {
+    if (id === 'settings') { router.replace('/wallets/settings'); return; }
+  }, [id, router]);
+
+  const isReservedSegment = id === 'settings';
+
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [policy, setPolicy] = useState<Policy | null>(null);
   const [children, setChildren] = useState<Wallet[]>([]);
@@ -102,6 +112,7 @@ export default function WalletDetailPage() {
   const [newClaimToken, setNewClaimToken] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [showTopUp, setShowTopUp] = useState(false);
+  const [showEditPolicy, setShowEditPolicy] = useState(false);
 
   async function load() {
     try {
@@ -122,7 +133,7 @@ export default function WalletDetailPage() {
     }
   }
 
-  useEffect(() => { load(); }, [id]);
+  useEffect(() => { if (!isReservedSegment) load(); }, [id]);
 
   async function freeze() {
     if (!wallet) return;
@@ -248,7 +259,10 @@ export default function WalletDetailPage() {
         {/* Policy summary */}
         {policy && (
           <div className="card page-enter page-enter-delay-2" style={{ padding: '20px' }}>
-            <div style={{ fontWeight: 500, marginBottom: '14px', fontSize: '12px' }}>Spending policy</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+              <span style={{ fontWeight: 500, fontSize: '12px' }}>Spending policy</span>
+              <button className="btn btn-ghost btn-sm" onClick={() => setShowEditPolicy(true)}>Edit</button>
+            </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {[
                 { label: 'Max per transaction', value: formatMoney(policy.max_single_spend) },
@@ -257,6 +271,7 @@ export default function WalletDetailPage() {
                 { label: 'Alert above', value: policy.alert_threshold ? formatMoney(policy.alert_threshold) : 'Off' },
                 { label: 'Require reason', value: policy.require_reason ? 'Yes' : 'No' },
                 { label: 'Allowed MCC', value: policy.allowed_mcc_codes?.length ? policy.allowed_mcc_codes.join(', ') : 'All categories' },
+                { label: 'Blocked MCC', value: policy.blocked_mcc_codes?.length ? policy.blocked_mcc_codes.join(', ') : 'None' },
               ].map(row => (
                 <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                   <span className="label">{row.label}</span>
@@ -265,6 +280,16 @@ export default function WalletDetailPage() {
               ))}
             </div>
           </div>
+        )}
+
+        {showEditPolicy && policy && (
+          <EditPolicyModal
+            walletId={wallet.id}
+            budgetLimit={wallet.budget_limit}
+            policy={policy}
+            onClose={() => setShowEditPolicy(false)}
+            onSaved={() => { load(); setShowEditPolicy(false); }}
+          />
         )}
 
         {/* Child wallets */}

@@ -2,12 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 
 const NAV = [
   { href: '/wallets', label: 'Wallets', icon: '◈' },
-  { href: '/wallets/alerts',  label: 'Alerts',  icon: '◉' },
   { href: '/wallets/settings', label: 'Settings', icon: '◎' },
+  { href: '/wallets/integrations', label: 'Integrations', icon: '◌' },
 ];
 
 function getToken() {
@@ -19,12 +19,17 @@ function getToken() {
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const mainRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     if (!getToken()) {
       router.replace('/login');
     }
   }, [router]);
+
+  useLayoutEffect(() => {
+    if (mainRef.current) mainRef.current.scrollTop = 0;
+  }, [pathname]);
 
   if (typeof document !== 'undefined' && !getToken()) {
     return null;
@@ -86,7 +91,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '2px', padding: '0 12px', flex: 1 }}>
           {NAV.map(item => {
             const active = item.href === '/wallets'
-              ? pathname === '/wallets' || (pathname.startsWith('/wallets/') && !pathname.startsWith('/wallets/alerts') && !pathname.startsWith('/wallets/settings'))
+              ? pathname === '/wallets' || (pathname.startsWith('/wallets/') && !pathname.startsWith('/wallets/settings') && !pathname.startsWith('/wallets/integrations'))
               : pathname === item.href;
             return (
               <Link
@@ -111,7 +116,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* Main content */}
-      <main style={{ marginLeft: '200px', flex: 1, minWidth: 0 }}>
+      <main key={pathname} ref={mainRef} style={{ marginLeft: '200px', flex: 1, minWidth: 0, height: '100vh', overflowY: 'auto' }}>
         {children}
       </main>
     </div>

@@ -1,26 +1,266 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Azeret+Mono:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap');
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg:        #080b08;
+  --bg-1:      #0d110d;
+  --bg-2:      #131813;
+  --border:    #1a251a;
+  --border-2:  #243024;
+
+  --text:      #dceadc;
+  --text-2:    #7a937a;
+  --text-3:    #47634a;
+
+  --green:     #3dff82;
+  --green-dim: #0e2e1c;
+  --green-glow: rgba(61,255,130,0.15);
+
+  --red:       #ff4545;
+  --red-dim:   #2e0e0e;
+
+  --amber:     #ffaa00;
+  --amber-dim: #2e1f00;
+
+  --font-display: 'Syne', sans-serif;
+  --font-mono:    'Azeret Mono', monospace;
+  --radius: 4px;
+  --radius-lg: 8px;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  font-size: 14px;
+  scroll-behavior: smooth;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+section[id] {
+  scroll-margin-top: 52px;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar { width: 3px; height: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 2px; }
+
+::selection { background: var(--green-dim); color: var(--green); }
+
+/* ── Typography ─────────────────────────────────────── */
+.display { font-family: var(--font-display); }
+
+.label {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  font-weight: 500;
+}
+
+/* ── Cards ──────────────────────────────────────────── */
+.card {
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+/* ── Buttons ────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  transition:
+    background-color 0.12s var(--ease-out),
+    border-color     0.12s var(--ease-out),
+    box-shadow       0.15s var(--ease-out),
+    color            0.12s var(--ease-out),
+    transform        0.10s var(--ease-out);
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--green);
+  color: #000;
+}
+.btn-primary:hover {
+  background: #5fffaa;
+  box-shadow: 0 0 20px var(--green-glow);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--text-2);
+  border: 1px solid var(--border-2);
+}
+.btn-ghost:hover { border-color: var(--text-2); color: var(--text); }
+.btn-danger {
+  background: transparent;
+  color: var(--red);
+  border: 1px solid var(--red-dim);
+}
+.btn-danger:hover { background: var(--red-dim); }
+.btn-sm { padding: 5px 10px; font-size: 10px; }
+.btn:active:not(:disabled) { transform: scale(0.97); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Inputs ─────────────────────────────────────────── */
+.input {
+  width: 100%;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 9px 12px;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.12s;
+}
+.input:focus { border-color: var(--green); }
+.input::placeholder { color: var(--text-3); }
+
+/* ── Status badges ──────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 7px;
+  border-radius: 2px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+}
+.badge::before {
+  content: '';
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.badge-active    { background: var(--green-dim); color: var(--green); }
+.badge-active::before { background: var(--green); animation: pulse-dot 2.5s infinite; }
+.badge-frozen    { background: var(--red-dim);   color: var(--red);   }
+.badge-frozen::before { background: var(--red); }
+.badge-exhausted { background: var(--amber-dim); color: var(--amber); }
+.badge-exhausted::before { background: var(--amber); }
+.badge-expired   { background: var(--bg-2); color: var(--text-3); }
+.badge-expired::before { background: var(--text-3); }
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 var(--green); }
+  50% { opacity: 0.6; box-shadow: 0 0 4px 2px var(--green-glow); }
+}
+
+/* ── Progress ───────────────────────────────────────── */
+.progress {
+  height: 3px;
+  background: var(--bg-2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--green);
+  transition: width 0.7s var(--ease-out);
+}
+.progress-fill.warn { background: var(--amber); }
+.progress-fill.crit { background: var(--red); }
+
+/* ── Divider ────────────────────────────────────────── */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0;
+}
+
+/* ── Amount display ─────────────────────────────────── */
+.money {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Page enter animation ───────────────────────────── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(6px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0)   scale(1);    }
+}
+.page-enter {
+  animation: fade-up 0.22s var(--ease-out) both;
+}
+.page-enter-delay-1 { animation-delay: 0.04s; }
+.page-enter-delay-2 { animation-delay: 0.08s; }
+.page-enter-delay-3 { animation-delay: 0.12s; }
+.page-enter-delay-4 { animation-delay: 0.16s; }
+.page-enter-delay-5 { animation-delay: 0.20s; }
+.page-enter-delay-6 { animation-delay: 0.24s; }
+
+/* ── Nav ────────────────────────────────────────────── */
+.nav-link {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 10px; border-radius: var(--radius);
+  text-decoration: none; font-size: 12px; letter-spacing: 0.02em;
+  color: var(--text-2); background: transparent;
+  transition: color 0.14s var(--ease-out), background-color 0.14s var(--ease-out);
+}
+.nav-link:hover { color: var(--text); background: var(--bg-2); }
+.nav-link.active { font-weight: 500; color: var(--green); background: var(--green-dim); }
+.nav-link.active:hover { background: var(--green-dim); }
+
+.nav-signout {
+  width: 100%; text-align: left; padding: 7px 10px;
+  border-radius: var(--radius); background: transparent; border: none;
+  color: var(--text-3); cursor: pointer; font-size: 11px;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  font-family: var(--font-mono);
+  transition: color 0.14s var(--ease-out), transform 0.10s var(--ease-out);
+}
+.nav-signout:hover { color: var(--text-2); }
+.nav-signout:active { transform: scale(0.97); }
+
+/* ── Wallet card ────────────────────────────────────── */
+.wallet-card {
+  transition: border-color 0.15s var(--ease-out), box-shadow 0.18s var(--ease-out);
+}
+.wallet-card:hover {
+  border-color: var(--border-2);
+  box-shadow: 0 0 0 1px var(--border-2);
+}
+
+/* ── Modal animations ───────────────────────────────── */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.modal-overlay { animation: fade-in 0.18s var(--ease-out) both; }
+.modal-dialog  { animation: fade-up 0.22s var(--ease-out) both; animation-delay: 0.04s; }
+
+/* ── Reduced motion ─────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration:  0.01ms !important;
+    animation-delay:     0ms    !important;
+    transition-duration: 0.01ms !important;
+  }
 }

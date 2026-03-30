@@ -36,10 +36,10 @@ export default function TopUpModal({ walletId, currentBalance, onClose, onSucces
 
     setLoading(true);
     try {
-      await api.topup(walletId, cents);
-      onSuccess();
+      const { checkout_url } = await api.topup(walletId, cents);
+      window.location.href = checkout_url;
     } catch (err: any) {
-      setError(err.message || 'Top up failed');
+      setError('Unable to top up wallet. Please try again later.');
       setLoading(false);
     }
   }
