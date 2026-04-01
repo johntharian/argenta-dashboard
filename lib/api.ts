@@ -162,8 +162,23 @@ export interface Wallet {
   stripe_card_id: string;
   claim_token: string | null;
   expires_at: string | null;
+  require_approval: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface ApprovalRequest {
+  id: string;
+  wallet_id: string;
+  amount_cents: number;
+  merchant_name: string;
+  merchant_mcc: string;
+  reason: string;
+  status: 'pending' | 'approved' | 'rejected' | 'expired';
+  created_at: string;
+  expires_at: string;
+  decided_at: string | null;
+  payment_id: string | null;
 }
 
 export interface Transaction {
@@ -202,12 +217,13 @@ export const wallets = {
 
   create: (body: {
     name: string; budget_limit: number; expires_at?: string;
+    require_approval?: boolean;
     policy: Partial<Policy>;
   }) => request<{ wallet: Wallet; policy: Policy; claim_token: string }>('/wallets', {
     method: 'POST', body: JSON.stringify(body),
   }),
 
-  update: (id: string, body: { name?: string; budget_limit?: number }) =>
+  update: (id: string, body: { name?: string; budget_limit?: number; require_approval?: boolean }) =>
     request<Wallet>(`/wallets/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
 
   freeze: (id: string) =>
@@ -240,6 +256,15 @@ export const wallets = {
 
   resolveAlert: (walletId: string, alertId: string) =>
     request<{ status: string }>(`/wallets/${walletId}/alerts/${alertId}/resolve`, { method: 'POST' }),
+
+  approvals: (id: string) =>
+    request<{ approvals: ApprovalRequest[] }>(`/wallets/${id}/approvals`).then(r => r.approvals ?? []),
+
+  approvePayment: (walletId: string, approvalId: string) =>
+    request<{ approved: boolean; payment_id: string }>(`/wallets/${walletId}/approvals/${approvalId}/approve`, { method: 'POST' }),
+
+  rejectPayment: (walletId: string, approvalId: string) =>
+    request<{ rejected: boolean }>(`/wallets/${walletId}/approvals/${approvalId}/reject`, { method: 'POST' }),
 };
 
 export const billing = {

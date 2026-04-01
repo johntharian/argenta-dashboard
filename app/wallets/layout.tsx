@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 const NAV = [
   { href: '/wallets', label: 'Wallets', icon: '◈' },
@@ -20,10 +20,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const router = useRouter();
   const mainRef = useRef<HTMLElement>(null);
+  const [authed, setAuthed] = useState(false);
 
   useEffect(() => {
     if (!getToken()) {
       router.replace('/login');
+    } else {
+      setAuthed(true);
     }
   }, [router]);
 
@@ -31,9 +34,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     if (mainRef.current) mainRef.current.scrollTop = 0;
   }, [pathname]);
 
-  if (typeof document !== 'undefined' && !getToken()) {
-    return null;
-  }
+  if (!authed) return null;
 
   function logout() {
     document.cookie = 'access_token=; max-age=0; path=/';

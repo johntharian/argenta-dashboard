@@ -12,10 +12,10 @@ const STEPS = [
 const FEATURES = [
   { icon: '◈', label: 'Scoped budgets', desc: 'Per-agent limits: daily, weekly, per-transaction, total budget' },
   { icon: '◉', label: 'Instant freeze', desc: 'Revoke any wallet immediately. Cascades to all child wallets' },
-  { icon: '◎', label: 'No card exposure', desc: 'Agents never see card numbers. Only a scoped key and a budget' },
-  { icon: '◆', label: 'Delegation tree', desc: 'Wallet can delegate a slice of its budget to a child agent' },
-  { icon: '◇', label: 'MCP-native', desc: 'Claude, Cursor, and any MCP runtime connect out of the box' },
-  { icon: '◐', label: 'Alert on every spend', desc: 'Threshold alerts, budget warnings, and approval hooks' },
+  { icon: '■', label: 'No card exposure', desc: 'Agents never see card numbers. Only a scoped key and a budget' },
+  { icon: '◇', label: 'Delegation tree', desc: 'Wallet can delegate a slice of its budget to a child agent' },
+  { icon: '○', label: 'MCP-native', desc: 'Claude, Cursor, and any MCP runtime connect out of the box' },
+  { icon: '□', label: 'Alert on every spend', desc: 'Threshold alerts, budget warnings, and approval hooks' },
 ];
 
 const USE_CASES = [

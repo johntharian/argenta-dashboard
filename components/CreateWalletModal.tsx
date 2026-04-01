@@ -17,6 +17,7 @@ export default function CreateWalletModal({ onClose, onCreated }: Props) {
   const [dailyLimit, setDailyLimit] = useState('');
   const [alertThreshold, setAlertThreshold] = useState('');
   const [requireReason, setRequireReason] = useState(true);
+  const [requireApproval, setRequireApproval] = useState(true);
   const [blockedMCCs, setBlockedMCCs] = useState<string[]>([]);
   const [blockedMccInput, setBlockedMccInput] = useState('');
   const [allowedMCCs, setAllowedMCCs] = useState<string[]>([]);
@@ -41,6 +42,7 @@ export default function CreateWalletModal({ onClose, onCreated }: Props) {
       const res = await api.create({
         name,
         budget_limit: Math.round(parseFloat(budget) * 100),
+        require_approval: requireApproval,
         policy: {
           max_single_spend: Math.round(parseFloat(maxSingle || budget) * 100),
           daily_limit: dailyLimit ? Math.round(parseFloat(dailyLimit) * 100) : null,
@@ -156,6 +158,35 @@ export default function CreateWalletModal({ onClose, onCreated }: Props) {
               <label htmlFor="require-reason" style={{ fontSize: '12px', cursor: 'pointer' }}>
                 Require agent to provide reason for each spend
               </label>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '2px 0 10px' }}>
+              <input
+                type="checkbox"
+                id="require-approval"
+                checked={requireApproval}
+                onChange={e => setRequireApproval(e.target.checked)}
+                style={{ accentColor: 'var(--green)', width: 14, height: 14, marginTop: 2 }}
+              />
+              <div>
+                <label htmlFor="require-approval" style={{ fontSize: '12px', cursor: 'pointer' }}>
+                  Require approval for all payments
+                </label>
+                {!requireApproval && (
+                  <div style={{
+                    marginTop: '6px',
+                    padding: '8px 10px',
+                    background: 'var(--yellow-dim, rgba(234,179,8,0.08))',
+                    border: '1px solid var(--yellow, #ca8a04)',
+                    borderRadius: 'var(--radius)',
+                    fontSize: '11px',
+                    lineHeight: 1.5,
+                    color: 'var(--yellow, #ca8a04)',
+                  }}>
+                    AI agents will spend autonomously. If something goes wrong, merchant dispute resolution takes 2–6 weeks and is not guaranteed. Consider keeping a low max per transaction limit.
+                  </div>
+                )}
+              </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>

@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   wallets as api, formatMoney, availableBalance, budgetPercent,
-  type Wallet, type Policy, type Transaction, type Alert,
+  type Wallet, type Policy, type Transaction, type Alert, type ApprovalRequest,
 } from '@/lib/api';
 import ClaimTokenBox from '@/components/ClaimTokenBox';
 import TopUpModal from '@/components/TopUpModal';
@@ -46,6 +46,47 @@ function TxRow({ tx }: { tx: Transaction }) {
           background: tx.status === 'declined' ? 'var(--red-dim)' : tx.status === 'settled' ? 'var(--green-dim)' : 'var(--bg-2)',
           borderRadius: '2px',
         }}>{tx.status}</span>
+      </div>
+    </div>
+  );
+}
+
+function ApprovalRow({ approval, walletId, onDecision }: { approval: ApprovalRequest; walletId: string; onDecision: () => void }) {
+  const [loading, setLoading] = useState<'approve' | 'reject' | null>(null);
+  const minutesLeft = Math.max(0, Math.round((new Date(approval.expires_at).getTime() - Date.now()) / 60000));
+
+  async function approve() {
+    setLoading('approve');
+    try { await api.approvePayment(walletId, approval.id); onDecision(); } finally { setLoading(null); }
+  }
+  async function reject() {
+    setLoading('reject');
+    try { await api.rejectPayment(walletId, approval.id); onDecision(); } finally { setLoading(null); }
+  }
+
+  return (
+    <div style={{
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      padding: '12px 0', borderBottom: '1px solid var(--border)', gap: '12px',
+    }}>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontSize: '12px', fontWeight: 500, marginBottom: '2px' }}>
+          {approval.merchant_name} — {formatMoney(approval.amount_cents)}
+        </div>
+        {approval.reason && (
+          <div style={{ color: 'var(--text-3)', fontSize: '11px', marginBottom: '2px' }}>{approval.reason}</div>
+        )}
+        <div style={{ color: 'var(--text-3)', fontSize: '10px' }}>
+          Expires in {minutesLeft}m · {new Date(approval.created_at).toLocaleTimeString()}
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: '6px' }}>
+        <button className="btn btn-danger btn-sm" onClick={reject} disabled={loading !== null}>
+          {loading === 'reject' ? '...' : 'Reject'}
+        </button>
+        <button className="btn btn-primary btn-sm" onClick={approve} disabled={loading !== null}>
+          {loading === 'approve' ? '...' : 'Approve'}
+        </button>
       </div>
     </div>
   );
@@ -108,6 +149,7 @@ export default function WalletDetailPage() {
   const [children, setChildren] = useState<Wallet[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [approvals, setApprovals] = useState<ApprovalRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [newClaimToken, setNewClaimToken] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -116,16 +158,18 @@ export default function WalletDetailPage() {
 
   async function load() {
     try {
-      const [walletData, txData, alertData] = await Promise.all([
+      const [walletData, txData, alertData, approvalData] = await Promise.all([
         api.get(id),
         api.transactions(id).catch(() => []),
         api.alerts(id).catch(() => []),
+        api.approvals(id).catch(() => []),
       ]);
       setWallet(walletData.wallet);
       setPolicy(walletData.policy);
       setChildren(walletData.children ?? []);
       setTransactions(txData as Transaction[]);
       setAlerts(alertData as Alert[]);
+      setApprovals(approvalData as ApprovalRequest[]);
     } catch {
       router.push('/wallets');
     } finally {
@@ -320,6 +364,28 @@ export default function WalletDetailPage() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Pending Approvals */}
+      <div className="card page-enter page-enter-delay-2" style={{ padding: '20px', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+          <span style={{ fontWeight: 500, fontSize: '12px' }}>
+            Pending approvals
+            {approvals.length > 0 && (
+              <span style={{ color: 'var(--text-3)', fontWeight: 400, marginLeft: '6px' }}>({approvals.length})</span>
+            )}
+          </span>
+          {!wallet.require_approval && (
+            <span style={{ fontSize: '10px', color: 'var(--text-3)' }}>Approval gate off — agents spend autonomously</span>
+          )}
+        </div>
+        {approvals.length === 0 ? (
+          <div style={{ color: 'var(--text-3)', fontSize: '12px', padding: '8px 0' }}>No pending approvals</div>
+        ) : (
+          approvals.map(a => (
+            <ApprovalRow key={a.id} approval={a} walletId={wallet.id} onDecision={load} />
+          ))
+        )}
       </div>
 
       {/* Alerts */}
